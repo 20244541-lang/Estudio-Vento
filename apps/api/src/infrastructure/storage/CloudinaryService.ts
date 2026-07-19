@@ -18,9 +18,9 @@ export class CloudinaryService {
    */
   static async uploadFile(filePath: string, originalName: string): Promise<string> {
     try {
-      // Usamos resource_type 'raw' para que acepte PDFs, DOCX, etc sin intentar procesarlos como imagen
+      // Usamos resource_type 'auto' para que Cloudinary detecte PDFs y los procese correctamente
       const result = await cloudinary.uploader.upload(filePath, {
-        resource_type: 'raw',
+        resource_type: 'auto',
         use_filename: true,
         unique_filename: true,
         folder: 'erp_legal_documents'
