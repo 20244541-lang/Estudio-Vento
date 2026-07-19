@@ -15,8 +15,8 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     internalNumber: `EXP-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`,
     docketNumber: '',
     clientId: '',
-    specialtyId: '0df6cbd5-514d-47b7-86e9-e60074780971', // Valid ID from DB (General)
-    entityId: 'edc60afe-8728-492e-a1c5-74e6a636aa7b', // Valid ID from DB (Poder Judicial)
+    specialtyId: 'a3353a7e-1a2e-4e6a-847c-917393ab375f', // Valid ID from DB (General)
+    entityId: 'cd829a26-08be-4b4a-ae1f-0e3a49cc5af6', // Valid ID from DB (Poder Judicial)
     responsibleId: '',
     description: '',
     startDate: new Date().toISOString().split('T')[0],
