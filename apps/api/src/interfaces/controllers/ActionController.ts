@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { GoogleDriveService } from '../../infrastructure/storage/GoogleDriveService';
+import { CloudinaryService } from '../../infrastructure/storage/CloudinaryService';
 import fs from 'fs';
 
 const prisma = new PrismaClient();
@@ -34,28 +34,27 @@ export class ActionController {
         if (file) {
           let documentData = undefined;
           try {
-            // Sube el archivo a Google Drive
-            const driveFile = await GoogleDriveService.uploadFile(
+            // Sube el archivo a Cloudinary
+            const cloudUrl = await CloudinaryService.uploadFile(
               file.path,
-              file.originalname,
-              file.mimetype
+              file.originalname
             );
 
             documentData = {
               name: file.originalname,
               type: file.mimetype,
               sizeBytes: file.size,
-              storageUrl: driveFile.webViewLink || driveFile.webContentLink || '',
+              storageUrl: cloudUrl,
               actionId: newAction.id,
               authorId: activeUserId
             };
 
-            // Elimina el archivo local temporal después de subirlo exitosamente a Drive
+            // Elimina el archivo local temporal después de subirlo exitosamente a Cloudinary
             fs.unlink(file.path, (err) => {
               if (err) console.error('Error al eliminar el archivo temporal local:', err);
             });
           } catch (uploadError) {
-            console.error('Fallo subiendo a Drive:', uploadError);
+            console.error('Fallo subiendo a Cloudinary:', uploadError);
             // Fallback a almacenamiento local en caso de fallo
             documentData = {
               name: file.originalname,
