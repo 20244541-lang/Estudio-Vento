@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import { clientService } from '../../services/clientService';
@@ -25,8 +25,24 @@ export default function CaseForm({ onClose }: CaseFormProps) {
   });
 
   const [error, setError] = useState('');
+  
+  // Estados para el buscador de clientes
+  const [clientSearch, setClientSearch] = useState('');
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const clientDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cargar lista de clientes para el select
+  // Cerrar el dropdown al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clientDropdownRef.current && !clientDropdownRef.current.contains(event.target as Node)) {
+        setShowClientDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Cargar lista de clientes
   const { data: clients, isLoading: clientsLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: clientService.getAll,
@@ -60,6 +76,12 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Filtrar clientes en base a la búsqueda
+  const filteredClients = clients?.filter((c: any) => 
+    c.name.toLowerCase().includes(clientSearch.toLowerCase()) || 
+    (c.documentId && c.documentId.includes(clientSearch))
+  ) || [];
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card w-full max-w-lg rounded-xl shadow-lg border border-border">
@@ -80,20 +102,64 @@ export default function CaseForm({ onClose }: CaseFormProps) {
             {clientsLoading ? (
               <div className="text-sm text-muted-foreground">Cargando clientes...</div>
             ) : (
-              <select
-                name="clientId"
-                value={formData.clientId}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
-              >
-                <option value="">Selecciona un cliente de tu directorio...</option>
-                {clients?.map((client: any) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name} - {client.documentId}
-                  </option>
-                ))}
-              </select>
+              <div className="relative" ref={clientDropdownRef}>
+                {formData.clientId ? (
+                  <div className="w-full px-3 py-2 border border-input rounded-md bg-muted/50 flex justify-between items-center">
+                    <span className="text-sm text-foreground font-medium">
+                      {clients?.find((c: any) => c.id === formData.clientId)?.name} - {clients?.find((c: any) => c.id === formData.clientId)?.documentId}
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={() => { setFormData({...formData, clientId: ''}); setClientSearch(''); }}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      title="Quitar cliente"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Buscar cliente por nombre o DNI..."
+                        value={clientSearch}
+                        onChange={(e) => {
+                          setClientSearch(e.target.value);
+                          setShowClientDropdown(true);
+                        }}
+                        onFocus={() => setShowClientDropdown(true)}
+                        className="w-full pl-9 pr-4 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+                      />
+                    </div>
+                    {showClientDropdown && (
+                      <ul className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-auto">
+                        {filteredClients.length > 0 ? (
+                          filteredClients.map((client: any) => (
+                            <li 
+                              key={client.id}
+                              onClick={() => {
+                                setFormData({ ...formData, clientId: client.id });
+                                setShowClientDropdown(false);
+                                setClientSearch('');
+                              }}
+                              className="px-4 py-2 text-sm hover:bg-muted cursor-pointer flex justify-between items-center text-foreground"
+                            >
+                              <span className="font-medium">{client.name}</span>
+                              <span className="text-xs text-muted-foreground">{client.documentId}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="px-4 py-3 text-sm text-muted-foreground text-center">
+                            No se encontraron clientes
+                          </li>
+                        )}
+                      </ul>
+                    )}
+                  </>
+                )}
+              </div>
             )}
             <p className="text-xs text-muted-foreground mt-1">
               El expediente se vinculará directamente a este cliente.

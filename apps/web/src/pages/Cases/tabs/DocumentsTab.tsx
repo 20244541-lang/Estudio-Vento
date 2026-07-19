@@ -1,13 +1,55 @@
-
-import { useQuery } from '@tanstack/react-query';
-import { FileText, Download, Clock, Search } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { FileText, Download, Clock, Search, Upload, Loader2 } from 'lucide-react';
 import { actionService } from '../../../services/subCaseServices';
+import { Button } from '../../../components/ui/button';
 
 export default function DocumentsTab({ caseId }: { caseId: string }) {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const { data: actions, isLoading } = useQuery({
     queryKey: ['case-actions', caseId],
     queryFn: () => actionService.getByCaseId(caseId),
   });
+
+  const uploadMutation = useMutation({
+    mutationFn: (formData: FormData) => actionService.create(caseId, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['case-actions', caseId] });
+      setIsUploading(false);
+    },
+    onError: () => {
+      alert('Error al subir el documento. Por favor intente de nuevo.');
+      setIsUploading(false);
+    }
+  });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    
+    // Crear una actuación genérica invisible
+    const formData = new FormData();
+    formData.append('type', 'DOCUMENT');
+    formData.append('date', new Date().toISOString().split('T')[0]);
+    formData.append('description', 'Documento subido directamente');
+    formData.append('file', file);
+
+    uploadMutation.mutate(formData);
+    
+    // Limpiar input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   // Aplanar todos los documentos de todas las actuaciones
   const allDocuments = actions?.reduce((acc: any[], action: any) => {
@@ -29,13 +71,29 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
           <h3 className="text-lg font-medium text-foreground">Gestor Documental</h3>
           <p className="text-sm text-muted-foreground">Consolidado de todos los archivos adjuntos en el expediente.</p>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar documento..."
-            className="w-full pl-9 pr-4 py-2 bg-muted/50 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        <div className="flex w-full sm:w-auto items-center gap-3">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar documento..."
+              className="w-full pl-9 pr-4 py-2 bg-muted/50 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileSelect} 
+            className="hidden" 
           />
+          <Button onClick={handleUploadClick} disabled={isUploading} className="shrink-0">
+            {isUploading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4 mr-2" />
+            )}
+            Subir Archivo
+          </Button>
         </div>
       </div>
 
@@ -45,7 +103,7 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
         <div className="text-center py-12 text-muted-foreground border-2 border-dashed border-border rounded-lg">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
           <p>No hay documentos registrados en este expediente.</p>
-          <p className="text-xs mt-1">Los documentos se añaden automáticamente al crear una nueva Actuación.</p>
+          <p className="text-xs mt-1">Sube tu primer documento usando el botón superior.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
