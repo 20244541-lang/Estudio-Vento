@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export class CaseController {
   static async create(req: Request, res: Response) {
     try {
-      const { internalNumber, docketNumber, clientId, specialtyId, entityId, responsibleId, description, startDate, priority, observations } = req.body;
+      const { internalNumber, docketNumber, clientId, specialtyId, entityId, responsibleId, description, startDate, priority, observations, tags } = req.body;
       
       const newCase = await prisma.case.create({
         data: { 
@@ -19,7 +19,8 @@ export class CaseController {
           description,
           startDate: startDate ? new Date(startDate) : new Date(),
           priority: priority || 'MEDIUM',
-          observations
+          observations,
+          tags: tags || []
         },
       });
       return res.status(201).json(newCase);
@@ -70,20 +71,26 @@ export class CaseController {
   static async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { docketNumber, status, priority, description, observations, startDate, closeDate, responsibleId } = req.body;
+      const { docketNumber, status, priority, description, observations, startDate, closeDate, responsibleId, specialtyId, entityId, tags } = req.body;
       
+      const updateData: any = { 
+        docketNumber, 
+        status, 
+        priority, 
+        description, 
+        observations,
+        responsibleId,
+        startDate: startDate ? new Date(startDate) : undefined,
+        closeDate: closeDate ? new Date(closeDate) : undefined
+      };
+      
+      if (specialtyId) updateData.specialtyId = specialtyId;
+      if (entityId) updateData.entityId = entityId;
+      if (tags) updateData.tags = tags;
+
       const updatedCase = await prisma.case.update({
         where: { id },
-        data: { 
-          docketNumber, 
-          status, 
-          priority, 
-          description, 
-          observations,
-          responsibleId,
-          startDate: startDate ? new Date(startDate) : undefined,
-          closeDate: closeDate ? new Date(closeDate) : undefined
-        },
+        data: updateData,
       });
       return res.status(200).json(updatedCase);
     } catch (error: any) {

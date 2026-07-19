@@ -26,6 +26,8 @@ export default function CaseEditForm({ caseData, onClose }: CaseEditFormProps) {
     entityId: caseData.entityId || '',
   });
 
+  const [specificMatter, setSpecificMatter] = useState(caseData.tags && caseData.tags.length > 0 ? caseData.tags[0] : '');
+
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: userService.getAll,
@@ -58,6 +60,7 @@ export default function CaseEditForm({ caseData, onClose }: CaseEditFormProps) {
     
     updateMutation.mutate({
       ...formData,
+      tags: specificMatter ? [specificMatter] : [],
       closeDate: formData.status === 'CLOSED' && !formData.closeDate 
         ? new Date().toISOString() 
         : formData.closeDate || undefined
@@ -112,7 +115,7 @@ export default function CaseEditForm({ caseData, onClose }: CaseEditFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Especialidad</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Categoría Principal</label>
               {specialtiesLoading ? (
                 <div className="text-sm text-muted-foreground">Cargando...</div>
               ) : (
@@ -122,13 +125,26 @@ export default function CaseEditForm({ caseData, onClose }: CaseEditFormProps) {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
                 >
-                  <option value="">Selecciona especialidad...</option>
+                  <option value="">Selecciona categoría...</option>
                   {specialties?.map((spec: any) => (
                     <option key={spec.id} value={spec.id}>{spec.name}</option>
                   ))}
                 </select>
               )}
             </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Materia Específica</label>
+              <input
+                type="text"
+                value={specificMatter}
+                onChange={(e) => setSpecificMatter(e.target.value)}
+                placeholder="Ej. Reposición, Despido..."
+                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Entidad / Juzgado</label>
               {entitiesLoading ? (

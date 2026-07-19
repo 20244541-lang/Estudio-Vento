@@ -169,7 +169,12 @@ export default function ClientDetail() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm text-foreground">{c.specialty?.name || 'General'}</span>
+                            <div className="flex flex-col">
+                              <span className="text-sm text-foreground">
+                                {c.specialty?.name || 'General'}
+                                {c.tags && c.tags.length > 0 && <span className="text-primary font-bold"> — {c.tags[0]}</span>}
+                              </span>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {c.actions && c.actions.length > 0 ? (

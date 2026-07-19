@@ -85,7 +85,10 @@ export default function Cases() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm text-foreground font-medium">{c.specialty?.name || 'General'}</span>
+                      <span className="text-sm text-foreground font-medium">
+                        {c.specialty?.name || 'General'}
+                        {c.tags && c.tags.length > 0 && <span className="text-primary font-bold"> — {c.tags[0]}</span>}
+                      </span>
                       <span className="text-xs text-muted-foreground">{c.entity?.name || 'No especificada'}</span>
                     </div>
                   </td>

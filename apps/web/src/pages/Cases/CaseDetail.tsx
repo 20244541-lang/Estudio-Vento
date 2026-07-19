@@ -84,7 +84,8 @@ export default function CaseDetail() {
           </h1>
           <p className="text-muted-foreground mt-1">
             Cliente: <span className="font-medium text-foreground">{caseData.client?.name}</span> | 
-            Especialidad: {caseData.specialty?.name || 'General'}
+            Categoría: {caseData.specialty?.name || 'General'}
+            {caseData.tags && caseData.tags.length > 0 && <span className="font-medium text-primary ml-1">— {caseData.tags[0]}</span>}
           </p>
         </div>
         <div className="flex gap-2">
@@ -203,9 +204,16 @@ export default function CaseDetail() {
                   </div>
 
                   <div className="flex justify-between items-center py-2 border-b border-border/50">
-                    <span className="text-sm font-medium text-muted-foreground">Especialidad</span>
+                    <span className="text-sm font-medium text-muted-foreground">Categoría Principal</span>
                     <span className="text-sm font-semibold text-foreground">{caseData.specialty?.name || 'General'}</span>
                   </div>
+
+                  {caseData.tags && caseData.tags.length > 0 && (
+                    <div className="flex justify-between items-center py-2 border-b border-border/50">
+                      <span className="text-sm font-medium text-muted-foreground">Materia Específica</span>
+                      <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">{caseData.tags[0]}</span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between items-center py-2 border-b border-border/50">
                     <span className="text-sm font-medium text-muted-foreground">Fecha de Ingreso</span>
