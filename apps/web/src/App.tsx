@@ -8,6 +8,7 @@ import ClientDetail from './pages/Clients/ClientDetail';
 import Cases from './pages/Cases';
 import CaseDetail from './pages/Cases/CaseDetail';
 import Calendar from './pages/Calendar';
+import Documents from './pages/Documents';
 import Settings from './pages/Settings';
 import { useAuthStore } from './store/authStore';
 import { AppLayout } from './components/layout/AppLayout';
@@ -67,6 +68,14 @@ function App() {
           element={
             <PrivateRoute>
               <Calendar />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/documents" 
+          element={
+            <PrivateRoute>
+              <Documents />
             </PrivateRoute>
           } 
         />

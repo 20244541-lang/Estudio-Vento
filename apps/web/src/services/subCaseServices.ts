@@ -69,3 +69,7 @@ export const deadlineService = {
 export const userService = {
   getAll: () => fetchWithAuth('/users'),
 };
+
+export const documentService = {
+  getAll: () => fetchWithAuth('/documents'),
+};

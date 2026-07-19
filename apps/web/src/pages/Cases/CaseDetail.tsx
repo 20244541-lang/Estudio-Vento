@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Edit, Trash2, Calendar, Paperclip, DollarSign, ListTodo, FileText } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Calendar, Paperclip, DollarSign, ListTodo, FileText, AlertCircle, Bookmark } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import ActionsTab from './tabs/ActionsTab';
 import ExpensesTab from './tabs/ExpensesTab';
 import DeadlinesTab from './tabs/DeadlinesTab';
 import DocumentsTab from './tabs/DocumentsTab';
+import CaseEditForm from './CaseEditForm';
 
 export default function CaseDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('resumen');
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
 
-  const { data: caseData, isLoading } = useQuery({
+  const { data: caseData, isLoading, refetch } = useQuery({
     queryKey: ['cases', id],
     queryFn: () => caseService.getById(id!),
     enabled: !!id,
@@ -36,6 +38,30 @@ export default function CaseDetail() {
     { id: 'gastos', label: 'Gastos / Aranceles', icon: DollarSign },
   ];
 
+  // Stats calculation
+  const actionsCount = caseData.actions?.length || 0;
+  const docsCount = caseData.actions?.reduce((acc: number, action: any) => acc + (action.documents?.length || 0), 0) || 0;
+  const deadlinesCount = caseData.deadlines?.length || 0;
+  
+  const getPriorityColor = (priority: string) => {
+    switch(priority) {
+      case 'URGENT': return 'bg-red-100 text-red-800 border-red-200';
+      case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'MEDIUM': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch(priority) {
+      case 'URGENT': return 'Urgente';
+      case 'HIGH': return 'Alta';
+      case 'MEDIUM': return 'Media';
+      case 'LOW': return 'Baja';
+      default: return priority;
+    }
+  };
+
   return (
     <div>
       {/* Cabecera del Caso */}
@@ -47,10 +73,13 @@ export default function CaseDetail() {
           >
             <ArrowLeft className="h-4 w-4 mr-1" /> Volver a expedientes
           </button>
-          <h1 className="text-2xl font-bold text-foreground flex items-center">
+          <h1 className="text-2xl font-bold text-foreground flex items-center flex-wrap gap-2">
             Exp. {caseData.internalNumber}
-            <span className={`ml-3 px-2.5 py-0.5 rounded-full text-xs font-medium ${caseData.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${caseData.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
               {caseData.status === 'OPEN' ? 'Abierto' : 'Cerrado'}
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(caseData.priority)}`}>
+              Prioridad {getPriorityLabel(caseData.priority)}
             </span>
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -59,8 +88,12 @@ export default function CaseDetail() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline"><Edit className="mr-2 h-4 w-4" /> Editar</Button>
-          <Button variant="outline" className="text-destructive hover:bg-destructive/10"><Trash2 className="mr-2 h-4 w-4" /> Eliminar</Button>
+          <Button variant="outline" onClick={() => setIsEditFormOpen(true)}>
+            <Edit className="mr-2 h-4 w-4" /> Editar
+          </Button>
+          <Button variant="outline" className="text-destructive hover:bg-destructive/10">
+            <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+          </Button>
         </div>
       </div>
 
@@ -91,19 +124,105 @@ export default function CaseDetail() {
       {/* Contenido de Tabs */}
       <div className="bg-card shadow-soft rounded-xl border border-border p-6 min-h-[400px]">
         {activeTab === 'resumen' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium text-foreground mb-2">Descripción del Problema Legal</h3>
-              <p className="text-muted-foreground whitespace-pre-wrap">{caseData.description || 'No hay descripción registrada.'}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-sm font-semibold text-foreground mb-1">N° Expediente Judicial</h4>
-                <p className="text-muted-foreground">{caseData.docketNumber || 'N/A'}</p>
+          <div className="space-y-8">
+            {/* Tarjetas de Estadísticas Rápidas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-primary/5 border border-primary/10 rounded-lg p-4 flex items-center">
+                <div className="bg-primary/10 p-3 rounded-full mr-4">
+                  <ListTodo className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Actuaciones</p>
+                  <h3 className="text-2xl font-bold text-foreground">{actionsCount}</h3>
+                </div>
               </div>
-              <div>
-                <h4 className="text-sm font-semibold text-foreground mb-1">Entidad / Juzgado</h4>
-                <p className="text-muted-foreground">{caseData.entity?.name || 'N/A'}</p>
+              <div className="bg-blue-50 border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800 rounded-lg p-4 flex items-center">
+                <div className="bg-blue-100 dark:bg-blue-800 p-3 rounded-full mr-4">
+                  <Paperclip className="h-6 w-6 text-blue-600 dark:text-blue-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Documentos Adjuntos</p>
+                  <h3 className="text-2xl font-bold text-foreground">{docsCount}</h3>
+                </div>
+              </div>
+              <div className="bg-orange-50 border border-orange-100 dark:bg-orange-900/20 dark:border-orange-800 rounded-lg p-4 flex items-center">
+                <div className="bg-orange-100 dark:bg-orange-800 p-3 rounded-full mr-4">
+                  <Calendar className="h-6 w-6 text-orange-600 dark:text-orange-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Plazos Registrados</p>
+                  <h3 className="text-2xl font-bold text-foreground">{deadlinesCount}</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Columna Izquierda */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-foreground flex items-center mb-3">
+                    <FileText className="h-5 w-5 mr-2 text-primary" />
+                    Descripción del Problema Legal
+                  </h3>
+                  <div className="bg-muted/30 border border-border p-4 rounded-lg">
+                    <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                      {caseData.description || 'No hay descripción registrada.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-foreground flex items-center mb-3">
+                    <AlertCircle className="h-5 w-5 mr-2 text-primary" />
+                    Observaciones Estratégicas
+                  </h3>
+                  <div className="bg-muted/30 border border-border p-4 rounded-lg">
+                    <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed text-sm">
+                      {caseData.observations || 'Sin observaciones registradas. (Usa el botón Editar para añadir notas internas)'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Columna Derecha */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-bold text-foreground flex items-center border-b border-border pb-2">
+                  <Bookmark className="h-5 w-5 mr-2 text-primary" />
+                  Datos del Expediente
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center py-2 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">N° Expediente Judicial</span>
+                    <span className="text-sm font-semibold text-foreground">{caseData.docketNumber || 'N/A'}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center py-2 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">Entidad / Juzgado</span>
+                    <span className="text-sm font-semibold text-foreground">{caseData.entity?.name || 'N/A'}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-2 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">Especialidad</span>
+                    <span className="text-sm font-semibold text-foreground">{caseData.specialty?.name || 'General'}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-2 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">Fecha de Ingreso</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {caseData.startDate ? new Date(caseData.startDate).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+
+                  {caseData.status === 'CLOSED' && (
+                    <div className="flex justify-between items-center py-2 border-b border-border/50">
+                      <span className="text-sm font-medium text-muted-foreground">Fecha de Cierre</span>
+                      <span className="text-sm font-semibold text-green-600">
+                        {caseData.closeDate ? new Date(caseData.closeDate).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -114,6 +233,16 @@ export default function CaseDetail() {
         {activeTab === 'plazos' && <DeadlinesTab caseId={id!} />}
         {activeTab === 'documentos' && <DocumentsTab caseId={caseData.id} />}
       </div>
+
+      {isEditFormOpen && (
+        <CaseEditForm 
+          caseData={caseData} 
+          onClose={(shouldRefetch) => {
+            setIsEditFormOpen(false);
+            if (shouldRefetch) refetch();
+          }} 
+        />
+      )}
     </div>
   );
 }

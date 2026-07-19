@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import { clientService } from '../../services/clientService';
+import { userService } from '../../services/subCaseServices';
 
 interface CaseFormProps {
   onClose: (shouldRefetch: boolean) => void;
@@ -16,8 +17,11 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     clientId: '',
     specialtyId: '0df6cbd5-514d-47b7-86e9-e60074780971', // Valid ID from DB (General)
     entityId: 'edc60afe-8728-492e-a1c5-74e6a636aa7b', // Valid ID from DB (Poder Judicial)
-    responsibleId: 'c1d2e3f4-1c2b-4e3d-8f9a-1b2c3d4e5f6a', // Mocked ID (El abogado actual)
+    responsibleId: '',
     description: '',
+    startDate: new Date().toISOString().split('T')[0],
+    priority: 'MEDIUM',
+    observations: '',
   });
 
   const [error, setError] = useState('');
@@ -26,6 +30,12 @@ export default function CaseForm({ onClose }: CaseFormProps) {
   const { data: clients, isLoading: clientsLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: clientService.getAll,
+  });
+
+  // Cargar lista de usuarios (abogados) para el responsable
+  const { data: users, isLoading: usersLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: userService.getAll,
   });
 
   const createMutation = useMutation({
@@ -116,7 +126,58 @@ export default function CaseForm({ onClose }: CaseFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Descripción breve del caso</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Abogado Responsable *</label>
+            {usersLoading ? (
+              <div className="text-sm text-muted-foreground">Cargando abogados...</div>
+            ) : (
+              <select
+                name="responsibleId"
+                value={formData.responsibleId}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+              >
+                <option value="">Selecciona un abogado responsable...</option>
+                {users?.map((user: any) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name} - {user.email}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Ingreso *</label>
+              <input
+                type="date"
+                name="startDate"
+                required
+                value={formData.startDate}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Prioridad *</label>
+              <select
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+              >
+                <option value="LOW">Baja</option>
+                <option value="MEDIUM">Media</option>
+                <option value="HIGH">Alta</option>
+                <option value="URGENT">Urgente</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Descripción breve del caso *</label>
             <textarea
               name="description"
               rows={3}
@@ -124,6 +185,18 @@ export default function CaseForm({ onClose }: CaseFormProps) {
               value={formData.description}
               onChange={handleChange}
               placeholder="Detalla de qué trata este problema legal..."
+              className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Observaciones / Notas (Opcional)</label>
+            <textarea
+              name="observations"
+              rows={2}
+              value={formData.observations}
+              onChange={handleChange}
+              placeholder="Notas internas, estrategia sugerida, etc."
               className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
             />
           </div>

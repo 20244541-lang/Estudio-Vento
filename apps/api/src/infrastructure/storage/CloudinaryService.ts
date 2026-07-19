@@ -25,9 +25,7 @@ export class CloudinaryService {
         unique_filename: true,
         folder: 'erp_legal_documents'
       });
-      // Inyectamos fl_attachment para forzar la descarga y evitar errores del visor PDF del navegador
-      const downloadUrl = result.secure_url.replace('/upload/', '/upload/fl_attachment/');
-      return downloadUrl;
+      return result.secure_url;
     } catch (error: any) {
       console.error('Error uploading to Cloudinary:', error);
       throw new Error(`Error subiendo archivo a Cloudinary: ${error.message || JSON.stringify(error)}`);

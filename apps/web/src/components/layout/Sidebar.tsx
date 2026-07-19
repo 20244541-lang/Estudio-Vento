@@ -18,7 +18,7 @@ export function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-primary text-primary-foreground shadow-lg">
       <div className="flex h-16 items-center px-6">
-        <h1 className="text-2xl font-bold tracking-tight">ERP Legal</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Estudio Vento</h1>
       </div>
       
       <nav className="flex-1 space-y-1 px-3 py-4">

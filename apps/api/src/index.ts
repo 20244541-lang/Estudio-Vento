@@ -9,6 +9,7 @@ import { ActionController } from './interfaces/controllers/ActionController';
 import { ExpenseController } from './interfaces/controllers/ExpenseController';
 import { DeadlineController } from './interfaces/controllers/DeadlineController';
 import { UserController } from './interfaces/controllers/UserController';
+import { DocumentController } from './interfaces/controllers/DocumentController';
 import { authenticate } from './interfaces/middlewares/authMiddleware';
 import { uploadMiddleware } from './interfaces/middlewares/uploadMiddleware';
 

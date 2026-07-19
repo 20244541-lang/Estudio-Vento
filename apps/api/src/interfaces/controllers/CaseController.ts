@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export class CaseController {
   static async create(req: Request, res: Response) {
     try {
-      const { internalNumber, docketNumber, clientId, specialtyId, entityId, responsibleId, description } = req.body;
+      const { internalNumber, docketNumber, clientId, specialtyId, entityId, responsibleId, description, startDate, priority, observations } = req.body;
       
       const newCase = await prisma.case.create({
         data: { 
@@ -16,7 +16,10 @@ export class CaseController {
           specialtyId, 
           entityId, 
           responsibleId, 
-          description 
+          description,
+          startDate: startDate ? new Date(startDate) : new Date(),
+          priority: priority || 'MEDIUM',
+          observations
         },
       });
       return res.status(201).json(newCase);
@@ -49,7 +52,7 @@ export class CaseController {
           client: true,
           specialty: true,
           entity: true,
-          actions: { orderBy: { date: 'desc' } },
+          actions: { orderBy: { date: 'desc' }, include: { documents: true } },
           deadlines: true,
           expenses: true,
           notes: true
@@ -67,11 +70,20 @@ export class CaseController {
   static async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { docketNumber, status, priority, description, observations } = req.body;
+      const { docketNumber, status, priority, description, observations, startDate, closeDate, responsibleId } = req.body;
       
       const updatedCase = await prisma.case.update({
         where: { id },
-        data: { docketNumber, status, priority, description, observations },
+        data: { 
+          docketNumber, 
+          status, 
+          priority, 
+          description, 
+          observations,
+          responsibleId,
+          startDate: startDate ? new Date(startDate) : undefined,
+          closeDate: closeDate ? new Date(closeDate) : undefined
+        },
       });
       return res.status(200).json(updatedCase);
     } catch (error: any) {
