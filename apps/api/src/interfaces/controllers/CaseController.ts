@@ -101,9 +101,18 @@ export class CaseController {
   static async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.case.delete({ where: { id } });
+      
+      await prisma.$transaction([
+        prisma.action.deleteMany({ where: { caseId: id } }),
+        prisma.deadline.deleteMany({ where: { caseId: id } }),
+        prisma.task.deleteMany({ where: { caseId: id } }),
+        prisma.note.deleteMany({ where: { caseId: id } }),
+        prisma.case.delete({ where: { id } })
+      ]);
+      
       return res.status(204).send();
     } catch (error: any) {
+      console.error('Error al eliminar caso:', error);
       return res.status(500).json({ message: 'Error interno al eliminar caso', error: error.message });
     }
   }

@@ -113,9 +113,23 @@ export class ClientController {
   static async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.client.delete({ where: { id } });
+      
+      // Encontrar los casos del cliente para borrar sus dependencias
+      const cases = await prisma.case.findMany({ where: { clientId: id }, select: { id: true } });
+      const caseIds = cases.map(c => c.id);
+
+      await prisma.$transaction([
+        prisma.action.deleteMany({ where: { caseId: { in: caseIds } } }),
+        prisma.deadline.deleteMany({ where: { caseId: { in: caseIds } } }),
+        prisma.task.deleteMany({ where: { caseId: { in: caseIds } } }),
+        prisma.note.deleteMany({ where: { caseId: { in: caseIds } } }),
+        prisma.case.deleteMany({ where: { clientId: id } }),
+        prisma.client.delete({ where: { id } })
+      ]);
+      
       return res.status(204).send();
     } catch (error: any) {
+      console.error('Error al eliminar cliente:', error);
       return res.status(500).json({ message: 'Error interno al eliminar cliente', error: error.message });
     }
   }
