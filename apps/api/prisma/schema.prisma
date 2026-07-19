@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  roleId       String
+  role         Role           @relation(fields: [roleId], references: [id])
+  cases        CaseAbogado[]
+  actions      Action[]
+  documents    Document[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // Admin, Abogado, Asistente, Secretaria, Invitado
+  permissions String[] // Basic permissions store
+  users       User[]
+}
+
+model Client {
+  id           String     @id @default(uuid())
+  name         String
+  documentId   String     @unique // DNI/RUC
+  dniPhotoUrl  String?    // URL to stored DNI photo
+  email        String?
+  phone        String?
+  address      String?
+  observations String?
+  status       String     @default("ACTIVE")
+  cases        Case[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Specialty {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  cases       Case[]
+}
+
+model Entity {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  cases       Case[]
+  actions     Action[]
+}
+
+model Case {
+  id             String         @id @default(uuid())
+  internalNumber String         @unique
+  docketNumber   String?        // numero de expediente
+  clientId       String
+  client         Client         @relation(fields: [clientId], references: [id])
+  specialtyId    String
+  specialty      Specialty      @relation(fields: [specialtyId], references: [id])
+  entityId       String
+  entity         Entity         @relation(fields: [entityId], references: [id])
+  status         String         @default("OPEN")
+  responsibleId  String
+  startDate      DateTime?
+  closeDate      DateTime?
+  priority       String         @default("MEDIUM")
+  description    String?
+  observations   String?
+  tags           String[]
+  
+  lawyers        CaseAbogado[]
+  actions        Action[]
+  deadlines      Deadline[]
+  tasks          Task[]
+  notes          Note[]
+  expenses       Expense[]
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model CaseAbogado {
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+
+  @@id([caseId, userId])
+}
+
+model Action {
+  id           String     @id @default(uuid())
+  type         String     // Demanda, Contestación, etc.
+  description  String?
+  date         DateTime   @default(now())
+  status       String     @default("PENDING")
+  
+  caseId       String
+  case         Case       @relation(fields: [caseId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  entityId     String?
+  entity       Entity?    @relation(fields: [entityId], references: [id])
+  
+  documents    Document[]
+  cargo        Cargo?
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Cargo {
+  id           String   @id @default(uuid())
+  actionId     String   @unique
+  action       Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  receiptDate  DateTime
+  details      String?
+  createdAt    DateTime @default(now())
+}
+
+model Document {
+  id           String   @id @default(uuid())
+  name         String
+  type         String
+  version      Int      @default(1)
+  sizeBytes    Int
+  storageUrl   String
+  observations String?
+  
+  actionId     String
+  action       Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id])
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Deadline {
+  id           String   @id @default(uuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id])
+  daysCount    Int
+  daysType     String   // HABILE/CALENDARIO
+  dueDate      DateTime
+  reminders    DateTime[] // When to remind
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Task {
+  id           String   @id @default(uuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id])
+  title        String
+  description  String?
+  status       String   @default("TODO")
+  priority     String   @default("MEDIUM")
+  dueDate      DateTime?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Note {
+  id           String   @id @default(uuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id])
+  content      String
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ChangeHistory {
+  id           String   @id @default(uuid())
+  entityName   String
+  entityId     String
+  userId       String
+  fieldName    String
+  oldValue     String?
+  newValue     String?
+  createdAt    DateTime @default(now())
+}
+
+model Expense {
+  id           String   @id @default(uuid())
+  description  String
+  amount       Float
+  date         DateTime @default(now())
+  status       String   @default("PENDING") // PENDING, PAID
+  
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

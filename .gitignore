@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+.env
+google-credentials.json
+drive_error.log
+.DS_Store
+uploads/
