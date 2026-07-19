@@ -90,12 +90,42 @@ export default function ClientDetail() {
             <div className="bg-card shadow-soft rounded-xl border border-border p-6">
               <h3 className="text-sm font-bold text-foreground mb-3 flex items-center">
                 <FileText className="h-4 w-4 mr-2 text-primary" />
-                Documento de Identidad (Foto)
+                Documento de Identidad (Foto/PDF)
               </h3>
-              <div className="h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-muted-foreground">
-                <FileText className="h-8 w-8 mb-2 opacity-20" />
-                <span className="text-xs">No hay foto adjunta</span>
-              </div>
+              {client.dniPhotoUrl ? (
+                client.dniPhotoUrl.toLowerCase().endsWith('.pdf') ? (
+                  <a 
+                    href={client.dniPhotoUrl.startsWith('http') ? client.dniPhotoUrl : `https://estudio-vento.onrender.com${client.dniPhotoUrl}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="h-32 border-2 border-border rounded-lg flex flex-col items-center justify-center text-primary bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group"
+                  >
+                    <FileText className="h-8 w-8 mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-medium">Ver PDF del DNI</span>
+                  </a>
+                ) : (
+                  <a 
+                    href={client.dniPhotoUrl.startsWith('http') ? client.dniPhotoUrl : `https://estudio-vento.onrender.com${client.dniPhotoUrl}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block relative h-48 border border-border rounded-lg overflow-hidden group cursor-pointer bg-muted/30"
+                  >
+                    <img 
+                      src={client.dniPhotoUrl.startsWith('http') ? client.dniPhotoUrl : `https://estudio-vento.onrender.com${client.dniPhotoUrl}`} 
+                      alt="DNI del Cliente" 
+                      className="w-full h-full object-contain"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white font-medium">Ampliar Imagen</span>
+                    </div>
+                  </a>
+                )
+              ) : (
+                <div className="h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-muted-foreground">
+                  <FileText className="h-8 w-8 mb-2 opacity-20" />
+                  <span className="text-xs">No hay foto adjunta</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -123,6 +153,8 @@ export default function ClientDetail() {
                     <thead className="bg-muted">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Expediente</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Especialidad</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Última Actuación</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Estado</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Acciones</th>
                       </tr>
@@ -133,8 +165,23 @@ export default function ClientDetail() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex flex-col">
                               <span className="text-sm font-medium text-primary">{c.internalNumber}</span>
-                              <span className="text-xs text-muted-foreground truncate max-w-[200px]">{c.description || 'Sin descripción'}</span>
+                              <span className="text-xs text-muted-foreground truncate max-w-[200px]" title={c.description}>{c.description || 'Sin descripción'}</span>
                             </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm text-foreground">{c.specialty?.name || 'General'}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {c.actions && c.actions.length > 0 ? (
+                              <div className="flex flex-col">
+                                <span className="text-sm text-foreground">{c.actions[0].type}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(c.actions[0].date).toLocaleDateString()}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground italic">Ninguna</span>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>

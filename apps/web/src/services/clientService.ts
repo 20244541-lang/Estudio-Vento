@@ -14,9 +14,13 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const { accessToken, logout } = useAuthStore.getState();
   
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
   };
+
+  // Only set application/json if it's not FormData
+  if (!(options.body instanceof FormData) && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
@@ -49,11 +53,11 @@ export const clientService = {
   getById: (id: string) => fetchWithAuth(`/clients/${id}`),
   create: (data: any) => fetchWithAuth('/clients', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: data instanceof FormData ? data : JSON.stringify(data),
   }),
   update: (id: string, data: any) => fetchWithAuth(`/clients/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: data instanceof FormData ? data : JSON.stringify(data),
   }),
   delete: (id: string) => fetchWithAuth(`/clients/${id}`, {
     method: 'DELETE',

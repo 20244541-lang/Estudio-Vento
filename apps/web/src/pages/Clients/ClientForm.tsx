@@ -19,16 +19,17 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
     observations: client?.observations || '',
   });
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState('');
 
   const createMutation = useMutation({
-    mutationFn: clientService.create,
+    mutationFn: (data: FormData) => clientService.create(data as any), // Cast to any to bypass strict type for now
     onSuccess: () => onClose(true),
     onError: (err: any) => setError(err.message),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => clientService.update(client.id, data),
+    mutationFn: (data: FormData) => clientService.update(client.id, data as any),
     onSuccess: () => onClose(true),
     onError: (err: any) => setError(err.message),
   });
@@ -37,10 +38,22 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
     e.preventDefault();
     setError('');
     
+    const payload = new FormData();
+    payload.append('name', formData.name);
+    payload.append('documentId', formData.documentId);
+    if (formData.email) payload.append('email', formData.email);
+    if (formData.phone) payload.append('phone', formData.phone);
+    if (formData.address) payload.append('address', formData.address);
+    if (formData.observations) payload.append('observations', formData.observations);
+    
+    if (selectedFile) {
+      payload.append('dniPhoto', selectedFile);
+    }
+    
     if (client?.id) {
-      updateMutation.mutate(formData);
+      updateMutation.mutate(payload);
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(payload);
     }
   };
 
@@ -75,7 +88,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">DNI / RUC *</label>
               <input
@@ -88,18 +101,24 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Foto del DNI (Opcional)</label>
-              <div className="mt-1 flex items-center">
+              <label className="block text-sm font-medium text-foreground mb-1">Foto o PDF del DNI (Opcional)</label>
+              <div className="mt-1 flex items-center relative group">
                 <input
                   type="file"
-                  accept="image/*"
-                  className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  accept="image/*,application/pdf"
+                  className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary hover:file:text-primary-foreground transition-all cursor-pointer"
                   onChange={(e) => {
-                    // Simulación de carga (aquí iría la lógica para subir a AWS/Drive)
-                    console.log("Archivo seleccionado:", e.target.files?.[0]);
+                    if (e.target.files && e.target.files.length > 0) {
+                      setSelectedFile(e.target.files[0]);
+                    }
                   }}
                 />
               </div>
+              {client?.dniPhotoUrl && !selectedFile && (
+                <p className="text-xs text-muted-foreground mt-1 text-green-600 font-medium">
+                  Este cliente ya tiene un documento adjunto. Subir uno nuevo lo reemplazará.
+                </p>
+              )}
             </div>
           </div>
 

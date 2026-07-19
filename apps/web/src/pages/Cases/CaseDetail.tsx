@@ -225,6 +225,49 @@ export default function CaseDetail() {
                 </div>
               </div>
             </div>
+
+            {/* Fila Inferior: Últimas Actuaciones */}
+            <div className="mt-8 pt-8 border-t border-border">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-foreground flex items-center">
+                  <ListTodo className="h-5 w-5 mr-2 text-primary" />
+                  Últimas Actuaciones
+                </h3>
+                <Button variant="ghost" size="sm" onClick={() => setActiveTab('actuaciones')}>
+                  Ver Todas
+                </Button>
+              </div>
+              
+              {(!caseData.actions || caseData.actions.length === 0) ? (
+                <div className="bg-muted/30 border border-border p-6 rounded-lg text-center text-muted-foreground text-sm">
+                  Aún no hay actuaciones (demandas, escritos, etc.) registradas en este expediente.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {caseData.actions.slice(0, 3).map((action: any) => (
+                    <div key={action.id} className="bg-card border border-border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+                          {action.type}
+                        </span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          {new Date(action.date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-foreground line-clamp-2 mt-2">
+                        {action.description || 'Sin descripción'}
+                      </p>
+                      {action.documents && action.documents.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-border/50 flex items-center text-xs text-muted-foreground">
+                          <Paperclip className="h-3 w-3 mr-1" />
+                          {action.documents.length} adjunto(s)
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

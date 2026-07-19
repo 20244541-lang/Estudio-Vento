@@ -34,9 +34,9 @@ app.get('/api/users', authenticate, UserController.getAll);
 
 // Clientes
 app.get('/api/clients', authenticate, ClientController.getAll);
-app.post('/api/clients', authenticate, ClientController.create);
+app.post('/api/clients', authenticate, uploadMiddleware.single('dniPhoto'), ClientController.create);
 app.get('/api/clients/:id', authenticate, ClientController.getById);
-app.put('/api/clients/:id', authenticate, ClientController.update);
+app.put('/api/clients/:id', authenticate, uploadMiddleware.single('dniPhoto'), ClientController.update);
 app.delete('/api/clients/:id', authenticate, ClientController.delete);
 
 // Casos
