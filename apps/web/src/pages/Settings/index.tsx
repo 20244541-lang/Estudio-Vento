@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Settings as SettingsIcon, Users, Building, Shield, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Building, Shield } from 'lucide-react';
 import { userService } from '../../services/subCaseServices';
 import { Button } from '../../components/ui/button';
 

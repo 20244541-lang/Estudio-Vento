@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Plus, Trash2, DollarSign } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { expenseService } from '../../../services/subCaseServices';
 

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, Plus, Bell, Users, Briefcase, FileText } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, Plus, Bell, Users, Briefcase } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';

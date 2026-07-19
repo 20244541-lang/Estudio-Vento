@@ -3,17 +3,19 @@ import { useAuthStore } from '../store/authStore';
 const API_URL = 'https://estudio-vento.onrender.com/api';
 
 class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  status: number;
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
   }
 }
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const { accessToken, logout } = useAuthStore.getState();
   
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> || {}),
   };
 
   if (accessToken) {

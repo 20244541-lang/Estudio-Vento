@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Users as UsersIcon, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { clientService } from '../../services/clientService';
 import ClientForm from './ClientForm';
