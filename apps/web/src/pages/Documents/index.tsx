@@ -79,7 +79,7 @@ export default function Documents() {
               </div>
               
               <a 
-                href={doc.storageUrl?.startsWith('http') ? doc.storageUrl : `http://localhost:3000${doc.storageUrl}`} 
+                href={doc.storageUrl?.startsWith('http') ? doc.storageUrl : `https://estudio-vento.onrender.com${doc.storageUrl}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"

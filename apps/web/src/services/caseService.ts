@@ -1,6 +1,6 @@
 import { useAuthStore } from '../store/authStore';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://estudio-vento.onrender.com/api';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {

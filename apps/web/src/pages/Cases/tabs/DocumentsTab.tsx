@@ -69,7 +69,7 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
                 </div>
               </div>
               <a 
-                href={doc.storageUrl?.startsWith('http') ? doc.storageUrl : `http://localhost:3000${doc.storageUrl}`} 
+                href={doc.storageUrl?.startsWith('http') ? doc.storageUrl : `https://estudio-vento.onrender.com${doc.storageUrl}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground py-2 rounded-md text-sm font-medium transition-colors"

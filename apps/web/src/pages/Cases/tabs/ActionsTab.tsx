@@ -212,7 +212,7 @@ export default function ActionsTab({ caseId }: { caseId: string }) {
                     {action.documents.map((doc: any) => (
                       <a 
                         key={doc.id}
-                        href={doc.storageUrl?.startsWith('http') ? doc.storageUrl : `http://localhost:3000${doc.storageUrl}`} 
+                        href={doc.storageUrl?.startsWith('http') ? doc.storageUrl : `https://estudio-vento.onrender.com${doc.storageUrl}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-flex items-center text-sm font-medium text-primary hover:text-blue-700 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-md transition-colors w-fit"
