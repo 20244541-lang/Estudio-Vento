@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import { userService } from '../../services/subCaseServices';
+import { catalogService } from '../../services/catalogService';
 
 interface CaseEditFormProps {
   caseData: any;
@@ -21,11 +22,23 @@ export default function CaseEditForm({ caseData, onClose }: CaseEditFormProps) {
     description: caseData.description || '',
     observations: caseData.observations || '',
     responsibleId: caseData.responsibleId || '',
+    specialtyId: caseData.specialtyId || '',
+    entityId: caseData.entityId || '',
   });
 
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: userService.getAll,
+  });
+
+  const { data: specialties, isLoading: specialtiesLoading } = useQuery({
+    queryKey: ['specialties'],
+    queryFn: catalogService.getSpecialties,
+  });
+
+  const { data: entities, isLoading: entitiesLoading } = useQuery({
+    queryKey: ['entities'],
+    queryFn: catalogService.getEntities,
   });
 
   const [error, setError] = useState('');
@@ -94,6 +107,45 @@ export default function CaseEditForm({ caseData, onClose }: CaseEditFormProps) {
                 <option value="CLOSED">Cerrado</option>
                 <option value="ARCHIVED">Archivado</option>
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Especialidad</label>
+              {specialtiesLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando...</div>
+              ) : (
+                <select
+                  name="specialtyId"
+                  value={formData.specialtyId}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+                >
+                  <option value="">Selecciona especialidad...</option>
+                  {specialties?.map((spec: any) => (
+                    <option key={spec.id} value={spec.id}>{spec.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Entidad / Juzgado</label>
+              {entitiesLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando...</div>
+              ) : (
+                <select
+                  name="entityId"
+                  value={formData.entityId}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+                >
+                  <option value="">Selecciona entidad...</option>
+                  {entities?.map((ent: any) => (
+                    <option key={ent.id} value={ent.id}>{ent.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

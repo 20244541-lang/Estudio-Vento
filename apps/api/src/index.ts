@@ -10,6 +10,7 @@ import { ExpenseController } from './interfaces/controllers/ExpenseController';
 import { DeadlineController } from './interfaces/controllers/DeadlineController';
 import { UserController } from './interfaces/controllers/UserController';
 import { DocumentController } from './interfaces/controllers/DocumentController';
+import { CatalogController } from './interfaces/controllers/CatalogController';
 import { authenticate } from './interfaces/middlewares/authMiddleware';
 import { uploadMiddleware } from './interfaces/middlewares/uploadMiddleware';
 
@@ -31,6 +32,10 @@ app.get('/health', (req, res) => {
 
 app.post('/api/auth/login', AuthController.login);
 app.get('/api/users', authenticate, UserController.getAll);
+
+// Catálogos
+app.get('/api/catalogs/specialties', authenticate, CatalogController.getSpecialties);
+app.get('/api/catalogs/entities', authenticate, CatalogController.getEntities);
 
 // Clientes
 app.get('/api/clients', authenticate, ClientController.getAll);

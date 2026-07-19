@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import { clientService } from '../../services/clientService';
 import { userService } from '../../services/subCaseServices';
+import { catalogService } from '../../services/catalogService';
 
 interface CaseFormProps {
   onClose: (shouldRefetch: boolean) => void;
@@ -15,8 +16,8 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     internalNumber: `EXP-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`,
     docketNumber: '',
     clientId: '',
-    specialtyId: 'a3353a7e-1a2e-4e6a-847c-917393ab375f', // Valid ID from DB (General)
-    entityId: 'cd829a26-08be-4b4a-ae1f-0e3a49cc5af6', // Valid ID from DB (Poder Judicial)
+    specialtyId: '',
+    entityId: '',
     responsibleId: '',
     description: '',
     startDate: new Date().toISOString().split('T')[0],
@@ -42,16 +43,25 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Cargar lista de clientes
+  // Cargar catálogos
   const { data: clients, isLoading: clientsLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: clientService.getAll,
   });
 
-  // Cargar lista de usuarios (abogados) para el responsable
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: userService.getAll,
+  });
+
+  const { data: specialties, isLoading: specialtiesLoading } = useQuery({
+    queryKey: ['specialties'],
+    queryFn: catalogService.getSpecialties,
+  });
+
+  const { data: entities, isLoading: entitiesLoading } = useQuery({
+    queryKey: ['entities'],
+    queryFn: catalogService.getEntities,
   });
 
   const createMutation = useMutation({
@@ -188,6 +198,47 @@ export default function CaseForm({ onClose }: CaseFormProps) {
                 placeholder="Ej. 00123-2026-0-1801..."
                 className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Especialidad *</label>
+              {specialtiesLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando...</div>
+              ) : (
+                <select
+                  name="specialtyId"
+                  value={formData.specialtyId}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+                >
+                  <option value="">Selecciona especialidad...</option>
+                  {specialties?.map((spec: any) => (
+                    <option key={spec.id} value={spec.id}>{spec.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Entidad / Juzgado *</label>
+              {entitiesLoading ? (
+                <div className="text-sm text-muted-foreground">Cargando...</div>
+              ) : (
+                <select
+                  name="entityId"
+                  value={formData.entityId}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
+                >
+                  <option value="">Selecciona entidad...</option>
+                  {entities?.map((ent: any) => (
+                    <option key={ent.id} value={ent.id}>{ent.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

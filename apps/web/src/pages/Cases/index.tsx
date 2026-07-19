@@ -70,16 +70,24 @@ export default function Cases() {
                     <div className="flex items-center">
                       <Briefcase className="flex-shrink-0 h-5 w-5 text-primary mr-3" />
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-primary">{c.internalNumber}</span>
-                        <span className="text-xs text-muted-foreground">{c.docketNumber || 'Sin exp. judicial'}</span>
+                        <span className="text-sm font-bold text-primary">{c.internalNumber}</span>
+                        <span className="text-xs text-foreground truncate max-w-[250px]" title={c.description}>
+                          {c.description || 'Sin descripción'}
+                        </span>
+                        {c.docketNumber && (
+                          <span className="text-xs text-muted-foreground mt-0.5">Exp. Jud: {c.docketNumber}</span>
+                        )}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                     {c.client?.name || 'Cargando...'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                    {c.specialty?.name || 'General'}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-foreground font-medium">{c.specialty?.name || 'General'}</span>
+                      <span className="text-xs text-muted-foreground">{c.entity?.name || 'No especificada'}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${c.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
