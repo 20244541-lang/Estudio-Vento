@@ -18,13 +18,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return user ? <AppLayout>{children}</AppLayout> : <Navigate to="/login" />;
 }
 
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
-
 function App() {
   return (
-    <>
-      <Router>
+    <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route 
@@ -99,12 +95,10 @@ function App() {
               </PrivateRoute>
             } 
           />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-        </Routes>
-      </Router>
-      <Analytics />
-      <SpeedInsights />
-    </>
+        {/* Futuras rutas irán aquí, envueltas en PrivateRoute */}
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </Router>
   );
 }
 
