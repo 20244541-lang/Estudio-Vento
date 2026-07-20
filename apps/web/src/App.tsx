@@ -18,87 +18,93 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return user ? <AppLayout>{children}</AppLayout> : <Navigate to="/login" />;
 }
 
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route 
-          path="/dashboard" 
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/cases" 
-          element={
-            <PrivateRoute>
-              <Cases />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/cases/:id" 
-          element={
-            <PrivateRoute>
-              <CaseDetail />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/clients" 
-          element={
-            <PrivateRoute>
-              <Clients />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/clients/:id" 
-          element={
-            <PrivateRoute>
-              <ClientDetail />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/calendar" 
-          element={
-            <PrivateRoute>
-              <Calendar />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/documents" 
-          element={
-            <PrivateRoute>
-              <Documents />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/templates" 
-          element={
-            <PrivateRoute>
-              <Templates />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/settings" 
-          element={
-            <PrivateRoute>
-              <Settings />
-            </PrivateRoute>
-          } 
-        />
-        {/* Futuras rutas irán aquí, envueltas en PrivateRoute */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/cases" 
+            element={
+              <PrivateRoute>
+                <Cases />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/cases/:id" 
+            element={
+              <PrivateRoute>
+                <CaseDetail />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/clients" 
+            element={
+              <PrivateRoute>
+                <Clients />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/clients/:id" 
+            element={
+              <PrivateRoute>
+                <ClientDetail />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/calendar" 
+            element={
+              <PrivateRoute>
+                <Calendar />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/documents" 
+            element={
+              <PrivateRoute>
+                <Documents />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/templates" 
+            element={
+              <PrivateRoute>
+                <Templates />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <PrivateRoute>
+                <Settings />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </Router>
+      <Analytics />
+      <SpeedInsights />
+    </>
   );
 }
 
