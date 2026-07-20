@@ -120,6 +120,9 @@ export class CaseController {
         prisma.deadline.deleteMany({ where: { caseId: id } }),
         prisma.task.deleteMany({ where: { caseId: id } }),
         prisma.note.deleteMany({ where: { caseId: id } }),
+        prisma.expense.deleteMany({ where: { caseId: id } }),
+        prisma.document.deleteMany({ where: { caseId: id } }),
+        prisma.caseAbogado.deleteMany({ where: { caseId: id } }),
         prisma.case.delete({ where: { id } })
       ]);
       

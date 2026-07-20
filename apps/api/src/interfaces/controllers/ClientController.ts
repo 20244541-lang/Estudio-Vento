@@ -119,10 +119,13 @@ export class ClientController {
       const caseIds = cases.map(c => c.id);
 
       await prisma.$transaction([
-        prisma.action.deleteMany({ where: { caseId: { in: caseIds } } }),
-        prisma.deadline.deleteMany({ where: { caseId: { in: caseIds } } }),
-        prisma.task.deleteMany({ where: { caseId: { in: caseIds } } }),
-        prisma.note.deleteMany({ where: { caseId: { in: caseIds } } }),
+        prisma.action.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.deadline.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.task.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.note.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.expense.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.document.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.caseAbogado.deleteMany({ where: { case: { clientId: id } } }),
         prisma.case.deleteMany({ where: { clientId: id } }),
         prisma.client.delete({ where: { id } })
       ]);
