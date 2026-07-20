@@ -83,6 +83,7 @@ model Case {
   tasks          Task[]
   notes          Note[]
   expenses       Expense[]
+  documents      Document[]
 
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -137,8 +138,10 @@ model Document {
   storageUrl   String
   observations String?
   
-  actionId     String
-  action       Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  actionId     String?
+  action       Action?  @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  caseId       String?
+  case         Case?    @relation(fields: [caseId], references: [id], onDelete: Cascade)
   authorId     String
   author       User     @relation(fields: [authorId], references: [id])
   

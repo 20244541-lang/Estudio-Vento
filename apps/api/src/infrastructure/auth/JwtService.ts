@@ -8,7 +8,7 @@ export interface TokenPayload {
 export class JwtService {
   private static readonly ACCESS_SECRET = process.env.JWT_SECRET || 'secret';
   private static readonly REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
-  private static readonly ACCESS_EXPIRES_IN = '15m';
+  private static readonly ACCESS_EXPIRES_IN = '7d';
   private static readonly REFRESH_EXPIRES_IN = '7d';
 
   static generateAccessToken(payload: TokenPayload): string {

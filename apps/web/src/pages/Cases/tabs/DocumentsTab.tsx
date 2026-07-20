@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Download, Clock, Search, Upload, Loader2 } from 'lucide-react';
-import { actionService } from '../../../services/subCaseServices';
+import { actionService, documentService } from '../../../services/subCaseServices';
 import { Button } from '../../../components/ui/button';
 
 export default function DocumentsTab({ caseId }: { caseId: string }) {
@@ -9,15 +9,20 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const { data: actions, isLoading } = useQuery({
+  const { data: actions, isLoading: isLoadingActions } = useQuery({
     queryKey: ['case-actions', caseId],
     queryFn: () => actionService.getByCaseId(caseId),
   });
 
+  const { data: standaloneDocs, isLoading: isLoadingDocs } = useQuery({
+    queryKey: ['case-standalone-docs', caseId],
+    queryFn: () => documentService.getByCaseId(caseId),
+  });
+
   const uploadMutation = useMutation({
-    mutationFn: (formData: FormData) => actionService.create(caseId, formData),
+    mutationFn: (formData: FormData) => documentService.createForCase(caseId, formData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['case-actions', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['case-standalone-docs', caseId] });
       setIsUploading(false);
     },
     onError: () => {
@@ -32,11 +37,7 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
 
     setIsUploading(true);
     
-    // Crear una actuación genérica invisible
     const formData = new FormData();
-    formData.append('type', 'DOCUMENT');
-    formData.append('date', new Date().toISOString().split('T')[0]);
-    formData.append('description', 'Documento subido directamente');
     formData.append('file', file);
 
     uploadMutation.mutate(formData);
@@ -51,8 +52,8 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
     fileInputRef.current?.click();
   };
 
-  // Aplanar todos los documentos de todas las actuaciones
-  const allDocuments = actions?.reduce((acc: any[], action: any) => {
+  // Aplanar documentos de actuaciones
+  const actionDocuments = actions?.reduce((acc: any[], action: any) => {
     if (action.documents && action.documents.length > 0) {
       const docsWithActionData = action.documents.map((doc: any) => ({
         ...doc,
@@ -63,6 +64,20 @@ export default function DocumentsTab({ caseId }: { caseId: string }) {
     }
     return acc;
   }, []) || [];
+
+  // Mapear documentos sueltos
+  const standaloneDocumentsMapped = standaloneDocs?.map((doc: any) => ({
+    ...doc,
+    actionType: 'Documento Libre',
+    actionDate: doc.createdAt,
+  })) || [];
+
+  // Unir ambos
+  const allDocuments = [...standaloneDocumentsMapped, ...actionDocuments].sort((a, b) => 
+    new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime()
+  );
+
+  const isLoading = isLoadingActions || isLoadingDocs;
 
   return (
     <div className="space-y-6">

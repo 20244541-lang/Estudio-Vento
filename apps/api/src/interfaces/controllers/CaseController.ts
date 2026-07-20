@@ -6,8 +6,21 @@ const prisma = new PrismaClient();
 export class CaseController {
   static async create(req: Request, res: Response) {
     try {
-      const { internalNumber, docketNumber, clientId, specialtyId, entityId, responsibleId, description, startDate, priority, observations, tags } = req.body;
+      const { docketNumber, clientId, specialtyId, entityId, responsibleId, description, startDate, priority, observations, tags } = req.body;
       
+      const lastCase = await prisma.case.findFirst({
+        orderBy: { createdAt: 'desc' }
+      });
+      
+      let nextNum = 1;
+      if (lastCase && lastCase.internalNumber && lastCase.internalNumber.startsWith('EXP-')) {
+        const parts = lastCase.internalNumber.split('-');
+        const lastNum = parseInt(parts[parts.length - 1], 10);
+        if (!isNaN(lastNum)) nextNum = lastNum + 1;
+      }
+      const currentYear = new Date().getFullYear();
+      const internalNumber = `EXP-${currentYear}-${nextNum.toString().padStart(4, '0')}`;
+
       const newCase = await prisma.case.create({
         data: { 
           internalNumber, 

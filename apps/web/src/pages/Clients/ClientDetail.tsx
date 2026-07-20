@@ -149,28 +149,25 @@ export default function ClientDetail() {
                     <p>Este cliente aún no tiene expedientes registrados.</p>
                   </div>
                 ) : (
-                  <table className="min-w-full divide-y divide-border">
+                  <table className="min-w-full divide-y divide-border table-fixed">
                     <thead className="bg-muted">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Expediente</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Especialidad</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Última Actuación</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Estado</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Acciones</th>
+                        <th className="w-1/4 px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Expediente</th>
+                        <th className="w-1/3 px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Materia</th>
+                        <th className="w-1/4 px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Última Actuación</th>
+                        <th className="w-24 px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Estado</th>
+                        <th className="w-24 px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                       {client.cases.map((c: any) => (
                         <tr key={c.id} className="hover:bg-muted/50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-primary">{c.internalNumber}</span>
-                              <span className="text-xs text-muted-foreground truncate max-w-[200px]" title={c.description}>{c.description || 'Sin descripción'}</span>
-                            </div>
+                          <td className="px-6 py-4 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <span className="text-sm font-bold text-primary truncate">{c.internalNumber}</span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <span className="text-sm text-foreground">
+                          <td className="px-6 py-4 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div className="flex flex-col overflow-hidden text-ellipsis">
+                              <span className="text-sm text-foreground truncate" title={`${c.specialty?.name || 'General'}${c.tags && c.tags.length > 0 ? ` — ${c.tags[0]}` : ''}`}>
                                 {c.specialty?.name || 'General'}
                                 {c.tags && c.tags.length > 0 && <span className="text-primary font-bold"> — {c.tags[0]}</span>}
                               </span>

@@ -13,7 +13,6 @@ interface CaseFormProps {
 
 export default function CaseForm({ onClose }: CaseFormProps) {
   const [formData, setFormData] = useState({
-    internalNumber: `EXP-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`,
     docketNumber: '',
     clientId: '',
     specialtyId: '',
@@ -183,17 +182,6 @@ export default function CaseForm({ onClose }: CaseFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Número Interno *</label>
-              <input
-                type="text"
-                name="internalNumber"
-                required
-                value={formData.internalNumber}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none bg-muted/50"
-              />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-foreground mb-1">N° Exp. Judicial</label>
               <input
                 type="text"
@@ -204,6 +192,7 @@ export default function CaseForm({ onClose }: CaseFormProps) {
                 className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
               />
             </div>
+            {/* El Número Interno ahora se genera automáticamente en el backend */}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

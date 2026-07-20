@@ -75,4 +75,9 @@ export const userService = {
 
 export const documentService = {
   getAll: () => fetchWithAuth('/documents'),
+  getByCaseId: (caseId: string) => fetchWithAuth(`/cases/${caseId}/documents`),
+  createForCase: (caseId: string, data: any) => fetchWithAuth(`/cases/${caseId}/documents`, {
+    method: 'POST',
+    body: data, // Usualmente un FormData
+  }),
 };

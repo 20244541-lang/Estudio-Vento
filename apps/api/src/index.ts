@@ -62,6 +62,10 @@ app.post('/api/cases/:caseId/expenses', authenticate, ExpenseController.create);
 app.put('/api/expenses/:id/status', authenticate, ExpenseController.updateStatus);
 app.delete('/api/expenses/:id', authenticate, ExpenseController.delete);
 
+// Documentos
+app.get('/api/cases/:caseId/documents', authenticate, DocumentController.getByCaseId);
+app.post('/api/cases/:caseId/documents', authenticate, uploadMiddleware.single('file'), DocumentController.createForCase);
+
 // Plazos (Deadlines)
 app.get('/api/deadlines', authenticate, DeadlineController.getAll);
 app.get('/api/cases/:caseId/deadlines', authenticate, DeadlineController.getByCaseId);
