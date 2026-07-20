@@ -13,8 +13,38 @@ import { DocumentController } from './interfaces/controllers/DocumentController'
 import { CatalogController } from './interfaces/controllers/CatalogController';
 import { authenticate } from './interfaces/middlewares/authMiddleware';
 import { uploadMiddleware } from './interfaces/middlewares/uploadMiddleware';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
+
+const prisma = new PrismaClient();
+
+async function seedDatabase() {
+  try {
+    const specialties = ['Demanda', 'Trámite administrativo', 'Contratos', 'General'];
+    for (const name of specialties) {
+      await prisma.specialty.upsert({
+        where: { name },
+        update: {},
+        create: { name }
+      });
+    }
+
+    const entities = ['Poder Judicial', 'SUNARP', 'SAT', 'RENIEC', 'Otros'];
+    for (const name of entities) {
+      await prisma.entity.upsert({
+        where: { name },
+        update: {},
+        create: { name }
+      });
+    }
+    console.log('Catálogos sincronizados.');
+  } catch (error) {
+    console.error('Error sincronizando catálogos:', error);
+  }
+}
+
+seedDatabase();
 
 const app = express();
 const port = process.env.PORT || 3000;

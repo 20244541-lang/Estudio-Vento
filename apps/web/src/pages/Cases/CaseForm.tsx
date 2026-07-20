@@ -4,14 +4,15 @@ import { X, Search } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import { clientService } from '../../services/clientService';
-import { userService } from '../../services/subCaseServices';
 import { catalogService } from '../../services/catalogService';
+import { useAuthStore } from '../../store/authStore';
 
 interface CaseFormProps {
   onClose: (shouldRefetch: boolean) => void;
 }
 
 export default function CaseForm({ onClose }: CaseFormProps) {
+  const { user } = useAuthStore();
   const [formData, setFormData] = useState({
     docketNumber: '',
     clientId: '',
@@ -50,11 +51,6 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     queryFn: clientService.getAll,
   });
 
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ['users'],
-    queryFn: userService.getAll,
-  });
-
   const { data: specialties, isLoading: specialtiesLoading } = useQuery({
     queryKey: ['specialties'],
     queryFn: catalogService.getSpecialties,
@@ -82,6 +78,7 @@ export default function CaseForm({ onClose }: CaseFormProps) {
     
     createMutation.mutate({
       ...formData,
+      responsibleId: user?.id,
       tags: specificMatter ? [specificMatter] : []
     });
   };
@@ -247,28 +244,6 @@ export default function CaseForm({ onClose }: CaseFormProps) {
                 </select>
               )}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Abogado Responsable *</label>
-            {usersLoading ? (
-              <div className="text-sm text-muted-foreground">Cargando abogados...</div>
-            ) : (
-              <select
-                name="responsibleId"
-                value={formData.responsibleId}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-input rounded-md bg-transparent focus:ring-2 focus:ring-ring focus:outline-none"
-              >
-                <option value="">Selecciona un abogado responsable...</option>
-                {users?.map((user: any) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} - {user.email}
-                  </option>
-                ))}
-              </select>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

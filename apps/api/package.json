@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "npx prisma generate && npx prisma db push && tsc",
+    "build": "npx prisma generate && node -e \"if(process.env.RENDER)require('child_process').execSync('npx prisma db push',{stdio:'inherit'})\" && tsc",
     "start": "node dist/index.js",
     "db:push": "prisma db push",
     "db:generate": "prisma generate"
