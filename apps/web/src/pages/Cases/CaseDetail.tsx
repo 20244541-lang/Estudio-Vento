@@ -62,6 +62,18 @@ export default function CaseDetail() {
     }
   };
 
+  const handleDelete = async () => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este expediente? Esta acción borrará permanentemente el expediente y todos sus registros asociados.')) {
+      try {
+        await caseService.delete(id!);
+        navigate('/cases');
+      } catch (error) {
+        console.error('Error al eliminar:', error);
+        alert('Hubo un error al eliminar el expediente. Inténtalo de nuevo.');
+      }
+    }
+  };
+
   return (
     <div>
       {/* Cabecera del Caso */}
@@ -92,7 +104,7 @@ export default function CaseDetail() {
           <Button variant="outline" onClick={() => setIsEditFormOpen(true)}>
             <Edit className="mr-2 h-4 w-4" /> Editar
           </Button>
-          <Button variant="outline" className="text-destructive hover:bg-destructive/10">
+          <Button variant="outline" className="text-destructive hover:bg-destructive/10" onClick={handleDelete}>
             <Trash2 className="mr-2 h-4 w-4" /> Eliminar
           </Button>
         </div>
