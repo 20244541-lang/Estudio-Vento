@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Edit, Trash2, Calendar, Paperclip, DollarSign, ListTodo, FileText, AlertCircle, Bookmark } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Calendar, Paperclip, DollarSign, ListTodo, FileText, AlertCircle, Bookmark, Gavel } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { caseService } from '../../services/caseService';
 import ActionsTab from './tabs/ActionsTab';
 import ExpensesTab from './tabs/ExpensesTab';
 import DeadlinesTab from './tabs/DeadlinesTab';
 import DocumentsTab from './tabs/DocumentsTab';
+import HearingsTab from './tabs/HearingsTab';
 import CaseEditForm from './CaseEditForm';
 
 export default function CaseDetail() {
@@ -33,6 +34,7 @@ export default function CaseDetail() {
   const tabs = [
     { id: 'resumen', label: 'Resumen', icon: FileText },
     { id: 'actuaciones', label: 'Actuaciones', icon: ListTodo },
+    { id: 'audiencias', label: 'Audiencias', icon: Gavel },
     { id: 'documentos', label: 'Documentos', icon: Paperclip },
     { id: 'plazos', label: 'Plazos', icon: Calendar },
     { id: 'gastos', label: 'Gastos / Aranceles', icon: DollarSign },
@@ -292,6 +294,7 @@ export default function CaseDetail() {
         )}
 
         {activeTab === 'actuaciones' && <ActionsTab caseId={id!} />}
+        {activeTab === 'audiencias' && <HearingsTab caseId={id!} />}
         {activeTab === 'gastos' && <ExpensesTab caseId={id!} />}
         {activeTab === 'plazos' && <DeadlinesTab caseId={id!} />}
         {activeTab === 'documentos' && <DocumentsTab caseId={caseData.id} />}

@@ -7,11 +7,12 @@ export class DeadlineController {
   static async create(req: Request, res: Response) {
     try {
       const { caseId } = req.params;
-      const { daysCount, daysType, dueDate } = req.body;
+      const { concept, daysCount, daysType, dueDate } = req.body;
       
       const newDeadline = await prisma.deadline.create({
         data: { 
           caseId,
+          concept: concept || 'Sin concepto',
           daysCount: parseInt(daysCount, 10), 
           daysType, 
           dueDate: new Date(dueDate)

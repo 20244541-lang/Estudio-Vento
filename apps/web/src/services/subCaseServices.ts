@@ -62,11 +62,24 @@ export const expenseService = {
 
 export const deadlineService = {
   getAll: () => fetchWithAuth(`/deadlines`),
+  getUpcoming: () => fetchWithAuth(`/deadlines/upcoming`),
   getByCaseId: (caseId: string) => fetchWithAuth(`/cases/${caseId}/deadlines`),
   create: (caseId: string, data: any) => fetchWithAuth(`/cases/${caseId}/deadlines`, {
     method: 'POST', body: JSON.stringify(data),
   }),
   delete: (id: string) => fetchWithAuth(`/deadlines/${id}`, { method: 'DELETE' }),
+};
+
+export const hearingService = {
+  getUpcoming: () => fetchWithAuth(`/hearings/upcoming`),
+  getByCaseId: (caseId: string) => fetchWithAuth(`/cases/${caseId}/hearings`),
+  create: (caseId: string, data: any) => fetchWithAuth(`/cases/${caseId}/hearings`, {
+    method: 'POST', body: JSON.stringify(data),
+  }),
+  updateStatus: (id: string, status: string) => fetchWithAuth(`/hearings/${id}/status`, {
+    method: 'PUT', body: JSON.stringify({ status }),
+  }),
+  delete: (id: string) => fetchWithAuth(`/hearings/${id}`, { method: 'DELETE' }),
 };
 
 export const userService = {

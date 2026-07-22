@@ -80,6 +80,7 @@ model Case {
   lawyers        CaseAbogado[]
   actions        Action[]
   deadlines      Deadline[]
+  hearings       Hearing[]
   tasks          Task[]
   notes          Note[]
   expenses       Expense[]
@@ -153,13 +154,28 @@ model Deadline {
   id           String   @id @default(uuid())
   caseId       String
   case         Case     @relation(fields: [caseId], references: [id])
+  concept      String   // Motivo/descripción del plazo (ej: "Contestar resolución N° 12")
   daysCount    Int
   daysType     String   // HABILE/CALENDARIO
   dueDate      DateTime
-  reminders    DateTime[] // When to remind
+  reminders    DateTime[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model Hearing {
+  id          String   @id @default(uuid())
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  type        String   // Texto libre: "Audiencia Única", "Conciliación", etc.
+  concept     String   // Descripción libre de la audiencia
+  scheduledAt DateTime // Fecha y hora
+  location    String?  // Lugar / sala / juzgado
+  notes       String?
+  status      String   @default("PENDING") // PENDING, HELD, POSTPONED, CANCELLED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Task {

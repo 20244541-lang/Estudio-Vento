@@ -8,6 +8,7 @@ import { CaseController } from './interfaces/controllers/CaseController';
 import { ActionController } from './interfaces/controllers/ActionController';
 import { ExpenseController } from './interfaces/controllers/ExpenseController';
 import { DeadlineController } from './interfaces/controllers/DeadlineController';
+import { HearingController } from './interfaces/controllers/HearingController';
 import { UserController } from './interfaces/controllers/UserController';
 import { DocumentController } from './interfaces/controllers/DocumentController';
 import { CatalogController } from './interfaces/controllers/CatalogController';
@@ -98,9 +99,17 @@ app.post('/api/cases/:caseId/documents', authenticate, uploadMiddleware.single('
 
 // Plazos (Deadlines)
 app.get('/api/deadlines', authenticate, DeadlineController.getAll);
+app.get('/api/deadlines/upcoming', authenticate, DeadlineController.getAll);
 app.get('/api/cases/:caseId/deadlines', authenticate, DeadlineController.getByCaseId);
 app.post('/api/cases/:caseId/deadlines', authenticate, DeadlineController.create);
 app.delete('/api/deadlines/:id', authenticate, DeadlineController.delete);
+
+// Audiencias (Hearings)
+app.get('/api/hearings/upcoming', authenticate, HearingController.getUpcoming);
+app.get('/api/cases/:caseId/hearings', authenticate, HearingController.getByCaseId);
+app.post('/api/cases/:caseId/hearings', authenticate, HearingController.create);
+app.put('/api/hearings/:id/status', authenticate, HearingController.updateStatus);
+app.delete('/api/hearings/:id', authenticate, HearingController.delete);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

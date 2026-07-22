@@ -122,6 +122,7 @@ export class CaseController {
         prisma.note.deleteMany({ where: { caseId: id } }),
         prisma.expense.deleteMany({ where: { caseId: id } }),
         prisma.document.deleteMany({ where: { caseId: id } }),
+        prisma.hearing.deleteMany({ where: { caseId: id } }),
         prisma.caseAbogado.deleteMany({ where: { caseId: id } }),
         prisma.case.delete({ where: { id } })
       ]);
