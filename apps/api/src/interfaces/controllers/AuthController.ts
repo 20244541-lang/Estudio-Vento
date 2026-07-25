@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../infrastructure/database/prismaClient';
 import { JwtService } from '../../infrastructure/auth/JwtService';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 export class AuthController {
   static async login(req: Request, res: Response) {

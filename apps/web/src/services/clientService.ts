@@ -48,8 +48,23 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
+function buildQueryString(params: Record<string, any>): string {
+  const qs = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== '' && v !== null)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+  return qs ? `?${qs}` : '';
+}
+
+export interface ClientFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
 export const clientService = {
-  getAll: () => fetchWithAuth('/clients'),
+  getAll: (filters: ClientFilters = {}) =>
+    fetchWithAuth(`/clients${buildQueryString({ page: 1, limit: 20, ...filters })}`),
   getById: (id: string) => fetchWithAuth(`/clients/${id}`),
   create: (data: any) => fetchWithAuth('/clients', {
     method: 'POST',

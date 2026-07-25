@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../infrastructure/database/prismaClient';
 import { CloudinaryService } from '../../infrastructure/storage/CloudinaryService';
 import fs from 'fs';
-
-const prisma = new PrismaClient();
 
 export class ClientController {
   static async create(req: Request, res: Response) {
@@ -42,10 +40,38 @@ export class ClientController {
 
   static async getAll(req: Request, res: Response) {
     try {
-      const clients = await prisma.client.findMany({
-        orderBy: { createdAt: 'desc' },
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const search = (req.query.search as string) || '';
+      const skip = (page - 1) * limit;
+
+      const where = search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' as const } },
+              { documentId: { contains: search, mode: 'insensitive' as const } },
+              { email: { contains: search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {};
+
+      const [clients, total] = await Promise.all([
+        prisma.client.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        prisma.client.count({ where }),
+      ]);
+
+      return res.status(200).json({
+        data: clients,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       });
-      return res.status(200).json(clients);
     } catch (error: any) {
       return res.status(500).json({ message: 'Error interno al obtener clientes', error: error.message });
     }
@@ -121,6 +147,7 @@ export class ClientController {
       await prisma.$transaction([
         prisma.action.deleteMany({ where: { case: { clientId: id } } }),
         prisma.deadline.deleteMany({ where: { case: { clientId: id } } }),
+        prisma.hearing.deleteMany({ where: { case: { clientId: id } } }),
         prisma.task.deleteMany({ where: { case: { clientId: id } } }),
         prisma.note.deleteMany({ where: { case: { clientId: id } } }),
         prisma.expense.deleteMany({ where: { case: { clientId: id } } }),

@@ -12,13 +12,12 @@ import { HearingController } from './interfaces/controllers/HearingController';
 import { UserController } from './interfaces/controllers/UserController';
 import { DocumentController } from './interfaces/controllers/DocumentController';
 import { CatalogController } from './interfaces/controllers/CatalogController';
+import { TemplateController } from './interfaces/controllers/TemplateController';
 import { authenticate } from './interfaces/middlewares/authMiddleware';
 import { uploadMiddleware } from './interfaces/middlewares/uploadMiddleware';
-import { PrismaClient } from '@prisma/client';
+import prisma from './infrastructure/database/prismaClient';
 
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 async function seedDatabase() {
   try {
@@ -50,7 +49,13 @@ seedDatabase();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://estudio-vento.vercel.app',
+    'http://localhost:5173', // para desarrollo local
+  ],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -110,6 +115,14 @@ app.get('/api/cases/:caseId/hearings', authenticate, HearingController.getByCase
 app.post('/api/cases/:caseId/hearings', authenticate, HearingController.create);
 app.put('/api/hearings/:id/status', authenticate, HearingController.updateStatus);
 app.delete('/api/hearings/:id', authenticate, HearingController.delete);
+
+// Plantillas (Templates)
+app.get('/api/templates', authenticate, TemplateController.getAll);
+app.post('/api/templates', authenticate, uploadMiddleware.single('file'), TemplateController.create);
+app.delete('/api/templates/:id', authenticate, TemplateController.delete);
+
+// Documentos globales
+app.get('/api/documents', authenticate, DocumentController.getAll);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

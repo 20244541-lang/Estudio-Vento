@@ -46,10 +46,11 @@ export default function CaseForm({ onClose }: CaseFormProps) {
   }, []);
 
   // Cargar catálogos
-  const { data: clients, isLoading: clientsLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: clientService.getAll,
+  const { data: clientsData, isLoading: clientsLoading } = useQuery({
+    queryKey: ['clients', 'all'],
+    queryFn: () => clientService.getAll({ limit: 200 }), // carga suficientes para el dropdown
   });
+  const clients = clientsData?.data;
 
   const { data: specialties, isLoading: specialtiesLoading } = useQuery({
     queryKey: ['specialties'],

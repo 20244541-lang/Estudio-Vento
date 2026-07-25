@@ -44,8 +44,39 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CaseFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  priority?: string;
+}
+
+export interface ClientFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+function buildQueryString(params: Record<string, any>): string {
+  const qs = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== '' && v !== null)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+  return qs ? `?${qs}` : '';
+}
+
 export const caseService = {
-  getAll: () => fetchWithAuth('/cases'),
+  getAll: (filters: CaseFilters = {}) =>
+    fetchWithAuth(`/cases${buildQueryString({ page: 1, limit: 20, ...filters })}`),
   getById: (id: string) => fetchWithAuth(`/cases/${id}`),
   create: (data: any) => fetchWithAuth('/cases', {
     method: 'POST',

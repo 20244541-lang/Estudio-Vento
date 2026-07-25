@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../infrastructure/database/prismaClient';
 
 export class UserController {
   static async getAll(req: Request, res: Response) {

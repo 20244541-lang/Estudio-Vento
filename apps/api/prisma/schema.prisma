@@ -226,3 +226,15 @@ model Expense {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model Template {
+  id          String   @id @default(uuid())
+  name        String
+  category    String   // General, Familia, Laboral, Civil, Penal
+  format      String   // DOCX, PDF, etc.
+  storageUrl  String
+  sizeBytes   Int
+  uploadedBy  String   // userId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

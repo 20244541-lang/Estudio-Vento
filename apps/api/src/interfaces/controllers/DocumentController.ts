@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../infrastructure/database/prismaClient';
 import { CloudinaryService } from '../../infrastructure/storage/CloudinaryService';
 import fs from 'fs';
-
-const prisma = new PrismaClient();
 
 export class DocumentController {
   static async getAll(req: Request, res: Response) {

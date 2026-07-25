@@ -87,14 +87,9 @@ export default function Settings() {
           )}
 
           <div className="mt-8 pt-6 border-t border-border">
-            <h3 className="text-sm font-medium text-foreground mb-3">Información de Acceso a Pruebas (MVP)</h3>
+            <h3 className="text-sm font-medium text-foreground mb-3">Información del Sistema</h3>
             <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
-              <p className="mb-2">Puedes cerrar sesión y probar estos accesos:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li><strong>Admin:</strong> admin@erplegal.com / admin123</li>
-                <li><strong>Abogado:</strong> abogado@erplegal.com / abogado123</li>
-                <li><strong>Asistente:</strong> asistente@erplegal.com / asistente123</li>
-              </ul>
+              <p>Estudio Jurídico Vento & Asociados — Sistema de Gestión Legal v1.0</p>
             </div>
           </div>
         </div>

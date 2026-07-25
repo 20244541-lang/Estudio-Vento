@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../infrastructure/database/prismaClient';
 
 export class CaseController {
   static async create(req: Request, res: Response) {
@@ -44,14 +42,48 @@ export class CaseController {
 
   static async getAll(req: Request, res: Response) {
     try {
-      const cases = await prisma.case.findMany({
-        orderBy: { createdAt: 'desc' },
-        include: {
-          client: true,
-          specialty: true,
-        }
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const search = (req.query.search as string) || '';
+      const status = req.query.status as string;
+      const priority = req.query.priority as string;
+      const skip = (page - 1) * limit;
+
+      const where: any = {};
+
+      if (status) where.status = status;
+      if (priority) where.priority = priority;
+
+      if (search) {
+        where.OR = [
+          { internalNumber: { contains: search, mode: 'insensitive' } },
+          { docketNumber: { contains: search, mode: 'insensitive' } },
+          { client: { name: { contains: search, mode: 'insensitive' } } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      const [cases, total] = await Promise.all([
+        prisma.case.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+          include: {
+            client: true,
+            specialty: true,
+          }
+        }),
+        prisma.case.count({ where }),
+      ]);
+
+      return res.status(200).json({
+        data: cases,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       });
-      return res.status(200).json(cases);
     } catch (error: any) {
       return res.status(500).json({ message: 'Error interno al obtener casos', error: error.message });
     }

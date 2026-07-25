@@ -23,10 +23,12 @@ const HEARING_STATUS: Record<string, { label: string; color: string }> = {
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const { data: cases, isLoading } = useQuery({
+  const { data: casesData, isLoading } = useQuery({
     queryKey: ['cases'],
-    queryFn: caseService.getAll,
+    queryFn: () => caseService.getAll({ limit: 50 }),
   });
+
+  const cases = casesData?.data;
 
   const { data: allDeadlines } = useQuery({
     queryKey: ['deadlines-all'],

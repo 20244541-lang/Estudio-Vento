@@ -1,15 +1,13 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../infrastructure/database/prismaClient';
 import { CloudinaryService } from '../../infrastructure/storage/CloudinaryService';
 import fs from 'fs';
-
-const prisma = new PrismaClient();
 
 export class ActionController {
   static async create(req: Request, res: Response) {
     try {
       const { caseId } = req.params;
-      const { type, description, date, status, userId, generateDeadline, daysCount, daysType, dueDate } = req.body;
+      const { type, description, date, status, userId, generateDeadline, daysCount, daysType, dueDate, deadlineConcept } = req.body;
       
       const file = req.file; // From multer
 
@@ -78,6 +76,7 @@ export class ActionController {
           await tx.deadline.create({
             data: {
               caseId,
+              concept: deadlineConcept || `Plazo generado desde actuación: ${type}`,
               daysCount: parseInt(daysCount || '0', 10),
               daysType: daysType || 'HABILE',
               dueDate: new Date(dueDate)
