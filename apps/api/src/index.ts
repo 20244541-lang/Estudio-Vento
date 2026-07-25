@@ -50,10 +50,18 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: [
-    'https://estudio-vento.vercel.app',
-    'http://localhost:5173', // para desarrollo local
-  ],
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (Postman, mobile apps, curl)
+    if (!origin) return callback(null, true);
+    // Permitir cualquier subdominio de vercel.app y localhost
+    const allowed = /^https:\/\/.*\.vercel\.app$/.test(origin)
+      || /^http:\/\/localhost(:\d+)?$/.test(origin);
+    if (allowed) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origen no permitido: ${origin}`));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
