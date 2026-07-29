@@ -292,8 +292,47 @@ export default function HearingsTab({ caseId }: { caseId: string }) {
         <div className="space-y-3">
           {hearings?.map((hearing: any) => {
             const statusInfo = STATUS_MAP[hearing.status] || STATUS_MAP.PENDING;
+
+            // Calcular urgencia solo para audiencias PENDIENTES
+            const now = new Date();
+            const scheduled = new Date(hearing.scheduledAt);
+            const diffMs = scheduled.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+            const urgency = hearing.status !== 'PENDING' ? null
+              : diffDays < 0   ? 'overdue'
+              : diffDays === 0 ? 'today'
+              : diffDays <= 2  ? 'imminent'
+              : diffDays <= 7  ? 'soon'
+              : null;
+
+            const urgencyCard: Record<string, string> = {
+              overdue:  'border-red-400 bg-red-50 dark:bg-red-950/20',
+              today:    'border-orange-400 bg-orange-50 dark:bg-orange-950/20',
+              imminent: 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/10',
+              soon:     'border-yellow-300 bg-yellow-50/50 dark:bg-yellow-950/10',
+            };
+            const urgencyDateBox: Record<string, string> = {
+              overdue:  'bg-red-500',
+              today:    'bg-orange-500',
+              imminent: 'bg-orange-400',
+              soon:     'bg-yellow-400',
+            };
+            const urgencyBadge: Record<string, { label: string; cls: string }> = {
+              overdue:  { label: '⚠ VENCIDA', cls: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' },
+              today:    { label: '⚡ HOY', cls: 'bg-orange-100 text-orange-900 dark:bg-orange-900/50 dark:text-orange-200 font-extrabold' },
+              imminent: { label: `⏰ En ${diffDays} día${diffDays !== 1 ? 's' : ''}`, cls: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' },
+              soon:     { label: `🕐 En ${diffDays} días`, cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' },
+            };
+
+            const cardClass = urgency ? urgencyCard[urgency] : 'bg-card border-border';
+            const dateBoxClass = urgency ? urgencyDateBox[urgency] : 'bg-primary/10';
+            const dateTextClass = urgency ? 'text-white' : 'text-primary';
+            const dateSubTextClass = urgency ? 'text-white/90' : 'text-primary/80';
+            const badge = urgency ? urgencyBadge[urgency] : null;
+
             return (
-              <div key={hearing.id} className="bg-card border border-border rounded-lg p-4 flex flex-col md:flex-row md:items-start gap-4 relative shadow-sm">
+              <div key={hearing.id} className={`border rounded-lg p-4 flex flex-col md:flex-row md:items-start gap-4 relative shadow-sm transition-all ${cardClass}`}>
                 <button
                   onClick={() => handleDelete(hearing.id)}
                   className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-colors"
@@ -301,14 +340,14 @@ export default function HearingsTab({ caseId }: { caseId: string }) {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-                <div className="flex-shrink-0 bg-primary/10 rounded-lg p-3 text-center min-w-[80px]">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">
+                <div className={`flex-shrink-0 rounded-lg p-3 text-center min-w-[80px] ${dateBoxClass}`}>
+                  <p className={`text-xs font-medium uppercase ${urgency ? 'text-white/70' : 'text-muted-foreground'}`}>
                     {new Date(hearing.scheduledAt).toLocaleDateString('es-PE', { month: 'short' })}
                   </p>
-                  <p className="text-2xl font-bold text-primary leading-none">
+                  <p className={`text-2xl font-bold leading-none ${dateTextClass}`}>
                     {new Date(hearing.scheduledAt).getDate()}
                   </p>
-                  <p className="text-xs font-semibold text-primary/80 mt-0.5">
+                  <p className={`text-xs font-bold mt-0.5 ${dateSubTextClass}`}>
                     {new Date(hearing.scheduledAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })}
                   </p>
                 </div>
@@ -320,6 +359,11 @@ export default function HearingsTab({ caseId }: { caseId: string }) {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusInfo.color}`}>
                       {statusInfo.label}
                     </span>
+                    {badge && (
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.cls}`}>
+                        {badge.label}
+                      </span>
+                    )}
                   </div>
                   <p className="font-semibold text-foreground text-sm">{hearing.concept}</p>
                   {hearing.location && (

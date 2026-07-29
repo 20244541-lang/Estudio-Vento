@@ -205,19 +205,54 @@ export default function Dashboard() {
             <ul className="divide-y divide-border">
               {upcomingHearings.map((h: any) => {
                 const statusInfo = HEARING_STATUS[h.status] || HEARING_STATUS.PENDING;
+
+                // Calcular urgencia
+                const now = new Date();
+                const scheduled = new Date(h.scheduledAt);
+                const diffDays = Math.ceil((scheduled.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                const urgency = diffDays < 0 ? 'overdue' : diffDays === 0 ? 'today' : diffDays <= 2 ? 'imminent' : diffDays <= 7 ? 'soon' : null;
+
+                const urgencyBg: Record<string, string> = {
+                  overdue:  'bg-red-50 dark:bg-red-950/20 hover:bg-red-100/70',
+                  today:    'bg-orange-50 dark:bg-orange-950/20 hover:bg-orange-100/70',
+                  imminent: 'bg-orange-50/50 dark:bg-orange-950/10 hover:bg-orange-100/50',
+                  soon:     'bg-yellow-50/50 dark:bg-yellow-950/10 hover:bg-yellow-100/50',
+                };
+                const urgencyDateBox: Record<string, string> = {
+                  overdue:  'bg-red-500',
+                  today:    'bg-orange-500',
+                  imminent: 'bg-orange-400',
+                  soon:     'bg-yellow-400',
+                };
+                const urgencyBadge: Record<string, { label: string; cls: string }> = {
+                  overdue:  { label: '⚠ VENCIDA', cls: 'bg-red-100 text-red-800' },
+                  today:    { label: '⚡ HOY', cls: 'bg-orange-100 text-orange-900 font-extrabold' },
+                  imminent: { label: `⏰ ${diffDays}d`, cls: 'bg-orange-100 text-orange-800' },
+                  soon:     { label: `🕐 ${diffDays}d`, cls: 'bg-yellow-100 text-yellow-800' },
+                };
+
+                const rowClass = urgency ? urgencyBg[urgency] : 'hover:bg-muted/50';
+                const dateBoxClass = urgency ? urgencyDateBox[urgency] : 'bg-primary/10';
+                const dateNumClass = urgency ? 'text-white' : 'text-primary';
+                const badge = urgency ? urgencyBadge[urgency] : null;
+
                 return (
                   <li
                     key={h.id}
-                    className="p-4 hover:bg-muted/50 transition-colors flex items-center gap-4 cursor-pointer"
+                    className={`p-4 transition-colors flex items-center gap-4 cursor-pointer ${rowClass}`}
                     onClick={() => h.case?.id && navigate(`/cases/${h.case.id}`)}
                   >
-                    {/* Mini calendario */}
-                    <div className="flex-shrink-0 bg-primary/10 rounded-lg p-2 text-center w-12">
-                      <p className="text-xs font-medium text-muted-foreground uppercase leading-none">
+                    {/* Mini calendario con color de urgencia */}
+                    <div className={`flex-shrink-0 rounded-lg p-2 text-center w-14 ${dateBoxClass}`}>
+                      <p className={`text-xs font-medium uppercase leading-none ${urgency ? 'text-white/70' : 'text-muted-foreground'}`}>
                         {new Date(h.scheduledAt).toLocaleDateString('es-PE', { month: 'short' })}
                       </p>
-                      <p className="text-lg font-bold text-primary leading-tight">
+                      <p className={`text-lg font-bold leading-tight ${dateNumClass}`}>
                         {new Date(h.scheduledAt).getDate()}
+                      </p>
+                      {/* HORA — prominente */}
+                      <p className={`text-xs font-extrabold leading-tight mt-0.5 ${urgency ? 'text-white' : 'text-primary'}`}>
+                        {new Date(h.scheduledAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })}
                       </p>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -228,10 +263,15 @@ export default function Dashboard() {
                         <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${statusInfo.color}`}>
                           {statusInfo.label}
                         </span>
+                        {badge && (
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${badge.cls}`}>
+                            {badge.label}
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm font-medium text-foreground mt-0.5 truncate">{h.concept}</p>
                       <p className="text-xs text-muted-foreground">
-                        {h.case?.client?.name || 'Sin cliente'} · {h.case?.internalNumber} · {new Date(h.scheduledAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                        {h.case?.client?.name || 'Sin cliente'} · {h.case?.internalNumber}
                       </p>
                     </div>
                   </li>
